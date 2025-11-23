@@ -37,11 +37,29 @@ public class ServiceHabito {
         return habitoRepository.findById(id).orElse(null);
     }
 
+    public List<HabitoResponse> getHabitos() {
+        Map<Integer, Long> contagemPorHabito = habitoDiarioRepository.findAll().stream()
+                .filter(hd -> hd.getStatus() == 1)
+                .collect(Collectors.groupingBy(
+                        HabitoDiario::getId_h,
+                        Collectors.counting()
+                ));
+
+        return habitoRepository.findAll().stream()
+                .map(habito -> new HabitoResponse(
+                        habito,
+                        contagemPorHabito.getOrDefault(habito.getId(), 0L).intValue()
+                ))
+                .toList();
+    }
+
 
     public List<HabitoDiarioResponse> findAllByData(LocalDate data) {
         List<Habito> habitos = habitoRepository.findAll();
         Map<Integer, HabitoDiario> mapHabito = habitoDiarioRepository.findAllByData(data).stream()
                 .collect(Collectors.toMap(HabitoDiario::getId_h, Function.identity()));
+
+        List<HabitoDiarioResponse> resposta = new ArrayList<>();
 
         for (Habito habito : habitos) {
             HabitoDiario habitoDiario = mapHabito.get(habito.getId());
@@ -49,11 +67,11 @@ public class ServiceHabito {
                 habitoDiario = new HabitoDiario(habito.getId(), data);
                 habitoDiarioRepository.save(habitoDiario);
             }
+            resposta.add(new HabitoDiarioResponse(habitoDiario, habito));
         }
 
-        //TODO fazer resposta e funcionar
-
-        return mapHabito.value();
+        return resposta;
+    }
 
 
 }

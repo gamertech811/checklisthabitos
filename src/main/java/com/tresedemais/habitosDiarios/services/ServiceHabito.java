@@ -37,6 +37,31 @@ public class ServiceHabito {
         return habitoRepository.findById(id).orElse(null);
     }
 
+    public Integer concluirHabitoDiario(IdRequest idRequest){
+       HabitoDiario habitoDiario =  habitoDiarioRepository.findById(idRequest.getId()).orElse(null);
+
+       if(habitoDiario == null){
+           //404
+           // nao encontrado
+           return 2;
+       }
+
+       if(habitoDiario.getData().isBefore(LocalDate.now())){
+           return 3; //"Não é possível concluir este hábito depois do dia agendado"
+       }
+
+       if (habitoDiario.getData().isAfter(LocalDate.now())){
+           return 4; //"Não é possível concluir este hábito antes do dia agendado"
+       }
+
+
+       habitoDiario.setStatus(1);
+       habitoDiarioRepository.save(habitoDiario);
+       return 1; // deu certo "
+
+
+    }
+
     public List<HabitoResponse> getHabitos() {
         Map<Integer, Long> contagemPorHabito = habitoDiarioRepository.findAll().stream()
                 .filter(hd -> hd.getStatus() == 1)

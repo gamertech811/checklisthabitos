@@ -35,13 +35,8 @@ public class HabitoController {
         return ResponseEntity.ok(habito);
     }
 
-    @PostMapping
-    public ResponseEntity<MessageResponse> criarHabito(@RequestBody Habito habito) {
-        habServ.criarHabito(habito);
-        return ResponseEntity.status(HttpStatus.OK).body(new MessageResponse("Hábito salvo com sucesso!"));
-    }
 
-     @PostMapping("/concluir")
+    @PostMapping("/concluir")
     public ResponseEntity<MessageResponse> concluirHabitoDiario(@RequestBody IdRequest idRequest){
 //        IdRequest idRequest = new IdRequest(id);
         Integer resposta = habServ.concluirHabitoDiario(idRequest);
@@ -63,6 +58,13 @@ public class HabitoController {
 //                break; // ja tem return
         }
 //        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new MessageResponse("Requisição com erro"));
+    }
+
+
+    @PostMapping
+    public ResponseEntity<MessageResponse> criarHabito(@RequestBody Habito habito) {
+        habServ.criarHabito(habito);
+        return ResponseEntity.status(HttpStatus.OK).body(new MessageResponse("Hábito salvo com sucesso!"));
     }
 
     @GetMapping("/data/{data}")

@@ -10,6 +10,10 @@ import com.tresedemais.habitosDiarios.repositories.HabitoRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Service
 public class ServiceHabito {
@@ -32,9 +36,33 @@ public class ServiceHabito {
         habitoRepository.deleteById(id);
     }
 
+//    public List<HabitoResponse> getHabitos(){
+//        Map<Integer, Long> contagemPorHabito = habitoDiarioRepository.findAll().stream()
+//                .collect(Collectors.groupingBy(
+//                        HabitoDiario::getId_h,      // agrupa pelo id_h
+//                        Collectors.counting()       // conta quantas vezes aparece
+//                ));
+//
+//    return habitoRepository.findAll().stream().map(
+//            habito -> new HabitoResponse(habito, contagemPorHabito.get(habito.getId()).intValue()))
+//    .toList();
+//
+//    }
 
-    public Habito findHabitoById(int id) {
-        return habitoRepository.findById(id).orElse(null);
+    public List<HabitoResponse> getHabitos() {
+        Map<Integer, Long> contagemPorHabito = habitoDiarioRepository.findAll().stream()
+                .filter(hd -> hd.getStatus() == 1)
+                .collect(Collectors.groupingBy(
+                        HabitoDiario::getId_h,
+                        Collectors.counting()
+                ));
+
+        return habitoRepository.findAll().stream()
+                .map(habito -> new HabitoResponse(
+                        habito,
+                        contagemPorHabito.getOrDefault(habito.getId(), 0L).intValue()
+                ))
+                .toList();
     }
 
     public Integer concluirHabitoDiario(IdRequest idRequest){
@@ -62,22 +90,10 @@ public class ServiceHabito {
 
     }
 
-    public List<HabitoResponse> getHabitos() {
-        Map<Integer, Long> contagemPorHabito = habitoDiarioRepository.findAll().stream()
-                .filter(hd -> hd.getStatus() == 1)
-                .collect(Collectors.groupingBy(
-                        HabitoDiario::getId_h,
-                        Collectors.counting()
-                ));
 
-        return habitoRepository.findAll().stream()
-                .map(habito -> new HabitoResponse(
-                        habito,
-                        contagemPorHabito.getOrDefault(habito.getId(), 0L).intValue()
-                ))
-                .toList();
+    public Habito findHabitoById(int id) {
+        return habitoRepository.findById(id).orElse(null);
     }
-
 
     public List<HabitoDiarioResponse> findAllByData(LocalDate data) {
         List<Habito> habitos = habitoRepository.findAll();
@@ -97,7 +113,5 @@ public class ServiceHabito {
 
         return resposta;
     }
-
-
 }
 
